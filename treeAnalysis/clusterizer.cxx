@@ -434,7 +434,6 @@ void runclusterizer(
 
       // ANCHOR V3 clusterizer logic
       else if(clusterizerEnum==kV3){
-//         cout << "running V3" << endl;
         // remove seed tower from sample
         input_towers.erase(input_towers.begin());
         for (int tit = 0; tit < (int)cluster_towers.size(); tit++){

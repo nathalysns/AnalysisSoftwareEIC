@@ -6,9 +6,11 @@
 #include "jet_observables.cxx"
 #include "caloheader.h"
 #include "clusterizer.cxx"
+#include "pi0studies.cxx"
 
 #include "jetresolutionhistos.cxx"
 #include "resolutionhistos.cxx"
+//#include "extracaloresolutionhistos.cxx"
 #include "clusterstudies.cxx"
 #include "trackingefficiency.cxx"
 #include "hitstudies.cxx"
@@ -25,7 +27,13 @@
 #include <fstream>
 
 void treeProcessing(
-    TString inFile              = "",
+    Double_t maxNEvent          = 200,
+    Double_t skip          = 0,
+    TString outfolder  = "out",
+    //TString inFile              = "pi0central.root",
+    //TString inFile              = "pi0fwd.root",
+    TString inFile              = "pi0bck.root",
+    //TString inFileGeometry      = "geometry_ideal_BECALproj_EEMC_LFHCAL_corrected.root",
     TString inFileGeometry      = "geometry.root",
     TString addOutputName       = "",
     bool do_reclus              = true,
@@ -33,7 +41,6 @@ void treeProcessing(
     // Double_t maxNEvent = 1e5,
     bool hasTiming              = true,
     bool isALLSILICON           = true,
-    Double_t maxNEvent          = -1,
     Int_t verbosity             = 0,
     bool doCalibration          = false,
     // Defaults to tracking from all layers.
@@ -44,12 +51,11 @@ void treeProcessing(
 ){
     // make output directory
     TString dateForOutput = ReturnDateStr();
-    outputDir = Form("treeProcessing/%s",addOutputName.Data());
+    outputDir = Form("%s/%s",outfolder.Data(),addOutputName.Data());
     gSystem->Exec("mkdir -p "+outputDir);
     gSystem->Exec("mkdir -p "+outputDir + "/etaphi");
 
     if(do_jetfinding) _do_jetfinding = true;
-
     // load tree
     TChain *const tt_event = new TChain("event_tree");
     if (inFile.EndsWith(".root")) {                     // are we loading a single root tree?
@@ -115,7 +121,7 @@ void treeProcessing(
 
     _nEventsTree=0;
     // main event loop
-    for (Long64_t i=0; i<nEntriesTree;i++) {
+    for (Long64_t i=skip; i<nEntriesTree;i++) {
         // load current event
         tt_event->GetEntry(i);
         _nEventsTree++;
@@ -194,6 +200,7 @@ void treeProcessing(
                 if(verbosity>1) cout << "clusterizing 5x5 for FEMC" << endl;
                 runclusterizer(k5x5, kFEMC,seed_E_FEMC, aggregation_E_FEMC, primaryTrackSource);
             }
+
             if(kV3<_active_algo){
                 if(verbosity>1) cout << "clusterizing V3 for FEMC" << endl;
                 runclusterizer(kV3, kFEMC,seed_E_FEMC, aggregation_E_FEMC, primaryTrackSource);
@@ -255,14 +262,55 @@ void treeProcessing(
                 if(verbosity>1) cout << "clusterizing MA for BECAL" << endl;
                 runclusterizer(kMA, kBECAL,seed_E_BECAL, aggregation_E_BECAL, primaryTrackSource);
             }
+	    if(k3x3<_active_algo){
+                if(verbosity>1) cout << "clusterizing 3x3 for BECAL" << endl;
+                runclusterizer(k3x3, kBECAL,seed_E_BECAL, aggregation_E_BECAL, primaryTrackSource);
+            }
+            if(k5x5<_active_algo){
+                if(verbosity>1) cout << "clusterizing 5x5 for BECAL" << endl;
+                runclusterizer(k5x5, kBECAL,seed_E_BECAL, aggregation_E_BECAL, primaryTrackSource);
+            }
+            if(kV3<_active_algo){
+                if(verbosity>1) cout << "clusterizing V3 for BECAL" << endl;
+                runclusterizer(kV3, kBECAL,seed_E_BECAL, aggregation_E_BECAL, primaryTrackSource);
+            }
+            if(kC3<_active_algo){
+                if(verbosity>1) cout << "clusterizing C3 for BECAL" << endl;
+                runclusterizer(kC3, kBECAL,seed_E_BECAL, aggregation_E_BECAL, primaryTrackSource);
+            }
+            if(kC5<_active_algo){
+                if(verbosity>1) cout << "clusterizing C5 for BECAL" << endl;
+                runclusterizer(kC5, kBECAL,seed_E_BECAL, aggregation_E_BECAL, primaryTrackSource);
+            }
+
         } 
 
         if(do_reclus && _nTowers_EEMC  && caloEnabled[kEEMC]){
             float seed_E_EEMC = 0.1;
             float aggregation_E_EEMC = 0.05;
-            if(kMA<_active_algo){
+	    if(kMA<_active_algo){
                 if(verbosity>1) cout << "clusterizing MA for EEMC" << endl;
                 runclusterizer(kMA, kEEMC,seed_E_EEMC, aggregation_E_EEMC, primaryTrackSource);
+            }
+	    if(k3x3<_active_algo){
+                if(verbosity>1) cout << "clusterizing 3x3 for EEMC" << endl;
+                runclusterizer(k3x3, kEEMC,seed_E_EEMC, aggregation_E_EEMC, primaryTrackSource);
+            }
+            if(k5x5<_active_algo){
+                if(verbosity>1) cout << "clusterizing 5x5 for EEMC" << endl;
+                runclusterizer(k5x5, kEEMC,seed_E_EEMC, aggregation_E_EEMC, primaryTrackSource);
+            }
+            if(kV3<_active_algo){
+                if(verbosity>1) cout << "clusterizing V3 for EEMC" << endl;
+                runclusterizer(kV3, kEEMC,seed_E_EEMC, aggregation_E_EEMC, primaryTrackSource);
+            }
+            if(kC3<_active_algo){
+                if(verbosity>1) cout << "clusterizing C3 for EEMC" << endl;
+                runclusterizer(kC3, kEEMC,seed_E_EEMC, aggregation_E_EEMC, primaryTrackSource);
+            }
+            if(kC5<_active_algo){
+                if(verbosity>1) cout << "clusterizing C5 for EEMC" << endl;
+                runclusterizer(kC5, kEEMC,seed_E_EEMC, aggregation_E_EEMC, primaryTrackSource);
             }
         } 
 
@@ -598,6 +646,8 @@ void treeProcessing(
         clusterstudies();
         if(verbosity>1) std::cout << "running resolutionhistos" << std::endl;
         resolutionhistos();
+        //extracaloresolutionhistos();
+	pi0studies();
         if(verbosity>1) std::cout << "loop done ... next event" << std::endl;
         if(tracksEnabled) trackmatchingstudies();
         
@@ -618,8 +668,10 @@ void treeProcessing(
     jetresolutionhistosSave();
     std::cout << "running resolutionhistosSave" << std::endl;
     resolutionhistosSave();
+    //extracaloresolutionhistosSave();
     std::cout << "running clusterstudiesSave" << std::endl;
     clusterstudiesSave();
+    pi0studiesSave();
     
     if(tracksEnabled){
       std::cout << "running trackingefficiencyhistosSave" << std::endl;

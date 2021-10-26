@@ -71,7 +71,7 @@ enum clusterizertype {
 // TString str_clusterizer[7] = {"V1", "V3", "3x3", "5x5", "C3", "C5", "MA"};
 TString str_clusterizer[7] = {"MA", "V3", "V1", "5x5", "C5", "C3", "3x3"};
 const int maxAlgo = 7;
-const int _active_algo = 1;
+const int _active_algo = 6;
 
 float _ch_DRCALO_pos_z = 1;
 float _ch_FHCAL_pos_z = 1;
